@@ -3,10 +3,13 @@ package br.com.kely.spacex.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -86,6 +89,7 @@ public class RecyclerViewLaunchesAdapter extends RecyclerView.Adapter<RecyclerVi
         private TextView textViewRecyclerViewRocketId;
         private TextView textViewRecyclerViewRocketName;
         private TextView textViewRecyclerViewRocketType;
+        private ImageView imageViewMission;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,6 +99,7 @@ public class RecyclerViewLaunchesAdapter extends RecyclerView.Adapter<RecyclerVi
             textViewRecyclerViewRocketId = itemView.findViewById(R.id.textViewRecyclerViewRocketId);
             textViewRecyclerViewRocketName = itemView.findViewById(R.id.textViewRecyclerViewRocketName);
             textViewRecyclerViewRocketType = itemView.findViewById(R.id.textViewRecyclerViewRocketType);
+            imageViewMission = itemView.findViewById(R.id.imageViewMission);
         }
 
         public void bind(Launch launch) {
@@ -104,6 +109,15 @@ public class RecyclerViewLaunchesAdapter extends RecyclerView.Adapter<RecyclerVi
             textViewRecyclerViewRocketId.setText(launch.getRocket().getRocketId());
             textViewRecyclerViewRocketName.setText(launch.getRocket().getRocketName());
             textViewRecyclerViewRocketType.setText(launch.getRocket().getRocketType());
+
+            if (launch.getLinks().getMissionPatch() != null){
+                Picasso.get().setIndicatorsEnabled(true);
+                Picasso.get()
+                        .load(launch.getLinks().getMissionPatch())
+                        .error(R.mipmap.ic_launcher)
+                        .placeholder(R.mipmap.ic_launcher)
+                        .into(imageViewMission);
+            }
         }
     }
 }
