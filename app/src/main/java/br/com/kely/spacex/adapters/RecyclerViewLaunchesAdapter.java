@@ -56,7 +56,25 @@ public class RecyclerViewLaunchesAdapter extends RecyclerView.Adapter<RecyclerVi
 
     //Método para atualizar o item
     public void updateLaunch(List<Launch> launches) {
-        this.launches = launches;
+
+        //verificar se o launches já tem informação se não tiver 
+        // adicionamos os novos dados na lista 
+        // caso já possua dados na lista, adicionamos os novos dados
+        // no final da lista com o método addAll() 
+        // e no final notificamos que o adapter foi alterado chamando o método 
+        // notifyDataSetChanged()
+
+        if (this.launches.isEmpty()){
+            this.launches = launches;
+        }else {
+            this.launches.addAll(launches);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void clear(){
+
+        this.launches.clear();
 
         notifyDataSetChanged();
     }
@@ -65,18 +83,27 @@ public class RecyclerViewLaunchesAdapter extends RecyclerView.Adapter<RecyclerVi
 
         private TextView textViewRecyclerViewFlightNumber;
         private TextView textViewRecyclerViewMissionName;
+        private TextView textViewRecyclerViewRocketId;
+        private TextView textViewRecyclerViewRocketName;
+        private TextView textViewRecyclerViewRocketType;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             textViewRecyclerViewFlightNumber = itemView.findViewById(R.id.textViewRecyclerViewFlightNumber);
             textViewRecyclerViewMissionName = itemView.findViewById(R.id.textViewRecyclerViewMissionName);
+            textViewRecyclerViewRocketId = itemView.findViewById(R.id.textViewRecyclerViewRocketId);
+            textViewRecyclerViewRocketName = itemView.findViewById(R.id.textViewRecyclerViewRocketName);
+            textViewRecyclerViewRocketType = itemView.findViewById(R.id.textViewRecyclerViewRocketType);
         }
 
         public void bind(Launch launch) {
 
             textViewRecyclerViewFlightNumber.setText(launch.getFlightNumber());
             textViewRecyclerViewMissionName.setText(launch.getMissionName());
+            textViewRecyclerViewRocketId.setText(launch.getRocket().getRocketId());
+            textViewRecyclerViewRocketName.setText(launch.getRocket().getRocketName());
+            textViewRecyclerViewRocketType.setText(launch.getRocket().getRocketType());
         }
     }
 }

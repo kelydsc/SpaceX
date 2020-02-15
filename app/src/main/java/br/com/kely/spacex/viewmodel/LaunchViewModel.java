@@ -43,16 +43,16 @@ public class LaunchViewModel extends AndroidViewModel {
     }
 
     //Busca a lista de Launches
-    public void getLaunches() {
+    public void getLaunches(String item, int pagina, int limite) {
 
         if (isNetworkConnected(getApplication())) {
-            getApiLaunches();
+            getApiLaunches(item, pagina, limite);
         }
     }
 
-    private void getApiLaunches() {
+    private void getApiLaunches(String item, int pagina, int limite) {
         disposable.add(
-                repository.getLaunches()
+                repository.getLaunches(item, pagina, limite)
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe(disposable1 -> loadingLiveData.setValue(true))
