@@ -1,17 +1,20 @@
 package br.com.kely.spacex.view;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.lifecycle.Observer;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,7 @@ import br.com.kely.spacex.R;
 import br.com.kely.spacex.adapters.RecyclerViewLaunchesAdapter;
 import br.com.kely.spacex.interfaces.RecyclerViewLaunchClickListener;
 import br.com.kely.spacex.model.api.Launch;
+import br.com.kely.spacex.model.globaldata.GlobalData;
 import br.com.kely.spacex.viewmodel.LaunchViewModel;
 
 public class MainActivity extends AppCompatActivity implements RecyclerViewLaunchClickListener {
@@ -35,11 +39,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewLaunc
 
     private ProgressBar progressBarBuscaLaunch;
 
-    //pagina atual
+    //offset = A partir de que registro começa a página
     private int pagina = 0;
 
-    //limite de pagins
-    private int limite = 10;
+    //limit = Quantidade de registros por página
+    private int limite = 50;
 
     private String itemBusca = "Falcon";
 
@@ -48,48 +52,23 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewLaunc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Seta a toolbar e o botão voltar(back)
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("SpaceX");
+
         initViews();
 
-        //busca dados da Api
-        launchViewModel.getLaunches(itemBusca, pagina, limite);
+        //busca dados da Api - All Launches
+        launchViewModel.getLaunches(itemBusca, pagina, limite, "");
 
-        //Observable Loading
-        launchViewModel.getLaunchesLoadingLiveData().observe(this, isLoading -> {
-            if (isLoading) {
-                progressBarBuscaLaunch.setVisibility(View.VISIBLE);
-            } else {
-                progressBarBuscaLaunch.setVisibility(View.GONE);
-            }
-        });
+        ocultaTeclado();
 
-        //valida retorno da api
-        launchViewModel.getLaunchesLiveData().observe(this, launchList -> adapter.updateLaunch(launchList));
+        //Valida retorno da Api
+        validaRetornoApi();
 
-        searchViewLaunch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                itemBusca = query;
-                adapter.clear();
-                launchViewModel.getLaunches(itemBusca, pagina, limite);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (newText.length() > 3){
-                    itemBusca = newText;
-                    adapter.clear();
-                    launchViewModel.getLaunches(itemBusca, pagina, limite);
-                }
-                return false;
-            }
-        });
-
-        //Observable Error
-        launchViewModel.getLaunchesErrorLiveData().observe(this, throwable -> {
-            Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
-        });
-
+        //Busca Launch por rocket name ou rocket type
+        validaBuscaLaunch();
     }
 
     private void initViews() {
@@ -114,6 +93,50 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewLaunc
         launchViewModel = ViewModelProviders.of(this).get(LaunchViewModel.class);
 
         setScrollListener();
+    }
+
+    private void ocultaTeclado() {
+
+        //Oculta o teclado no momento em que o usuário aperta um botão
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (imm.isActive())
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+    }
+
+    private void validaRetornoApi() {
+
+        ocultaTeclado();
+
+        //Observable Loading
+        launchViewModel.getLaunchesLoadingLiveData().observe(this, isLoading -> {
+            if (isLoading) {
+                progressBarBuscaLaunch.setVisibility(View.VISIBLE);
+            } else {
+                progressBarBuscaLaunch.setVisibility(View.GONE);
+            }
+        });
+
+        launchViewModel.getLaunchesLiveData().observe(this, launchListLocal -> {
+
+            //Valida o retorno da API
+            if (!launchListLocal.isEmpty() && launchListLocal != null) {
+
+                //Retorna os dados do Produto gravados na Api
+                launchList.addAll(launchListLocal);
+
+                adapter.updateLaunch(launchList);
+            } else {
+
+                Toast.makeText(getApplicationContext(),
+                        "Lançamento não localizado!",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
+        //Observable Error
+        launchViewModel.getLaunchesErrorLiveData().observe(this, throwable -> {
+            Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void setScrollListener() {
@@ -146,14 +169,64 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewLaunc
                 // uma nova requisição passando o novo número de página
                 if (totalItemCount > 0 && fimFoiEncontrado) {
                     pagina++;
-                    launchViewModel.getLaunches(itemBusca, pagina, limite);
+                    launchViewModel.getLaunches(itemBusca, pagina, limite, "");
                 }
             }
         });
     }
 
+    private void validaBuscaLaunch() {
+
+        searchViewLaunch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                ocultaTeclado();
+
+                if (itemBusca.length() > 6) {
+
+                    itemBusca = query;
+                    adapter.clear();
+
+                    //busca launch
+                    launchViewModel.getLaunchesbyRocket(itemBusca);
+
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "Digite pelo menos 7 caracteres para pesquisar o foguete ",
+                            Toast.LENGTH_LONG).show();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if (newText.length() > 6) {
+
+                    itemBusca = newText;
+                    adapter.clear();
+
+                    ocultaTeclado();
+
+                    //busca launch
+                    launchViewModel.getLaunchesbyRocket(itemBusca);
+                }
+                return false;
+            }
+
+        });
+    }
+
     @Override
     public void onClick(Launch launch) {
+
+        //Guarda na classe Global os dados do Launch selecionado na lista
+        GlobalData.setLaunch(launch);
+
+        //Chama a tela Detalhe
+        Intent intent = new Intent(MainActivity.this, DetalheLaunchActivity.class);
+        startActivity(intent);
 
     }
 }

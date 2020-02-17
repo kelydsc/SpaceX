@@ -9,7 +9,11 @@ import io.reactivex.Observable;
 public class LaunchRepository {
 
     //Retorna os dados da Api - SpaceX
-    public Observable<List<Launch>> getLaunches(String item, int pagina, int limite) {
-        return ApiService.getApiService().getLaunches(item, pagina, limite);
+    public Observable<List<Launch>> getLaunches(String item, int pagina, int limite, String ordem) {
+        return ApiService.getApiService().getLaunches(item, pagina, limite, "flight_number");
+}
+
+    public Observable<List<Launch>> getLaunchesbyRocket(String rocketId) {
+        return ApiService.getApiService().getLaunchesbyRocket(rocketId);
     }
 }

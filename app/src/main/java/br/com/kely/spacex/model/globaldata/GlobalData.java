@@ -1,21 +1,19 @@
 package br.com.kely.spacex.model.globaldata;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import br.com.kely.spacex.model.api.Launch;
 
 public class GlobalData {
 
-    static private List<String> launchList = new ArrayList<>();
+    private static Launch launch;
 
     public GlobalData() {
     }
 
-    public static List<String> getLaunchList() {
-        return launchList;
+    public static Launch getLaunch() {
+        return launch;
     }
 
-    public static void setLaunchList(List<String> launchList) {
-        GlobalData.launchList = launchList;
+    public static void setLaunch(Launch launch) {
+        GlobalData.launch = launch;
     }
 }

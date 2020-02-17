@@ -13,5 +13,10 @@ public interface Api {
     @GET("launches")
     Observable<List<Launch>> getLaunches(@Query("q") String item,
                                          @Query("offset") int pagina,
-                                         @Query("limit") int limite);
+                                         @Query("limit") int limite,
+                                         @Query("sort") String ordem);
+
+    //Lista de Launches by Rocket
+    @GET("launches")
+    Observable<List<Launch>> getLaunchesbyRocket(@Query("rocket_id") String rocketId);
 }

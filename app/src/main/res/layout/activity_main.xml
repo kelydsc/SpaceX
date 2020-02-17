@@ -8,12 +8,32 @@
     tools:context=".view.MainActivity"
     tools:ignore="MissingConstraints">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchViewLaunch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:maxLines="1"
-        android:hint="Search item">
+        app:iconifiedByDefault="false"
+        app:queryHint="Buscar por id do foguete">
     </androidx.appcompat.widget.SearchView>
 
     <ProgressBar

@@ -1,8 +1,10 @@
 package br.com.kely.spacex.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.view.inputmethod.InputMethodManager;
 
 public class Util {
 

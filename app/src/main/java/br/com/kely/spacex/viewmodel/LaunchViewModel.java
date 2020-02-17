@@ -43,16 +43,36 @@ public class LaunchViewModel extends AndroidViewModel {
     }
 
     //Busca a lista de Launches
-    public void getLaunches(String item, int pagina, int limite) {
+    public void getLaunches(String item, int pagina, int limite, String ordem) {
 
         if (isNetworkConnected(getApplication())) {
-            getApiLaunches(item, pagina, limite);
+            getApiLaunches(item, pagina, limite, ordem);
         }
     }
 
-    private void getApiLaunches(String item, int pagina, int limite) {
+    private void getApiLaunches(String item, int pagina, int limite, String ordem) {
         disposable.add(
-                repository.getLaunches(item, pagina, limite)
+                repository.getLaunches(item, pagina, limite, ordem)
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable1 -> loadingLiveData.setValue(true))
+                        .doAfterTerminate(() -> loadingLiveData.setValue(false))
+                        .subscribe(launches -> launchesLiveData.setValue(launches)
+                                , throwable -> errorLiveData.setValue(throwable))
+        );
+    }
+
+    //Busca a lista de Launches by Rocket
+    public void getLaunchesbyRocket(String rocketId) {
+
+        if (isNetworkConnected(getApplication())) {
+            getApiLaunchesbyRocket(rocketId);
+        }
+    }
+
+    private void getApiLaunchesbyRocket(String rocketId) {
+        disposable.add(
+                repository.getLaunchesbyRocket(rocketId)
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe(disposable1 -> loadingLiveData.setValue(true))
